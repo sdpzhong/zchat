@@ -5,7 +5,7 @@
  * @Last Modified time: 2022-10-22 15:35:56
  * @desc: Axios 请求参数或响应数据统一处理
  */
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { RequestOptions, Result } from '#/axios';
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
@@ -36,7 +36,7 @@ export abstract class AxiosTransform {
   requestInterceptors?: (
     config: AxiosRequestConfig,
     options: CreateAxiosOptions,
-  ) => AxiosRequestConfig;
+  ) => InternalAxiosRequestConfig;
 
   /**
    * @description: 请求之后的拦截器

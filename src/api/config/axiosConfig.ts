@@ -6,7 +6,7 @@
  * @desc: Axios 统一配置文件
  */
 import axios, { AxiosError, type AxiosResponse } from 'axios';
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import type { CreateAxiosOptions } from './axiosTransForm';
 import type { RequestOptions, Result, UploadFileParams } from '#/axios';
 import { cloneDeep } from 'lodash-es';
@@ -94,7 +94,7 @@ export class VAxios {
     const axiosCanceler = new AxiosCanceler();
 
     // 请求拦截器
-    this.instance.interceptors.request.use(async (config: AxiosRequestConfig) => {
+    this.instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
       // If cancel repeat request is turned on, then cancel repeat request is prohibited
       // @ts-ignore
       const { ignoreCancelToken } = config.requestOptions;
