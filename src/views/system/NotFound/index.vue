@@ -4,7 +4,9 @@
     <van-empty description="抱歉，当前页面不存在！">
       <van-button round type="primary" class="bottom-button" to="/">返回首页</van-button>
     </van-empty>
-    <copyright :style="{ color: '#aaa' }" />
+    <div class="bottom-copyright">
+      <copyright :style="{ color: '#aaa' }" />
+    </div>
   </div>
 </template>
 
@@ -14,8 +16,19 @@
 </script>
 
 <style lang="less" scoped>
-  .bottom-button {
-    width: 160px;
-    height: 40px;
+  .not-found {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .bottom-button {
+      width: 160px;
+      height: 40px;
+    }
+    .bottom-copyright {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+    }
   }
 </style>

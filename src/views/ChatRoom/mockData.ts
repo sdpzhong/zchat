@@ -2,10 +2,10 @@
  * @Author: zq
  * @Date: 2022-11-02 15:46:28
  * @Last Modified by: zq
- * @Last Modified time: 2022-11-03 12:05:11
+ * @Last Modified time: 2023-01-31 15:38:30
  */
 import { getCalendarDate } from '@/utils/calendarDate';
-import { toFormateUrls } from '@/utils/url';
+import { toFormatUrls } from '@/utils/url';
 import dayjs from 'dayjs';
 
 export interface ChatRecordItem {
@@ -15,6 +15,8 @@ export interface ChatRecordItem {
   isEndTime: boolean;
   isSelf: boolean;
   content: string;
+  uid?: string;
+  [x: string]: any;
 }
 
 const chatContent = [
@@ -88,7 +90,7 @@ export function getChatMockData(): ChatRecordItem[] {
       created_date: getCalendarDate(dayjs(+new Date() + i * 20000).format('YYYY-MM-DD HH:mm:ss')),
       isEndTime: i % 5 === 0,
       isSelf: i % 4 === 0,
-      content: toFormateUrls(
+      content: toFormatUrls(
         chatContent[Math.floor(Math.random() * chatContent.length)],
         undefined,
         'word-break: break-all;',

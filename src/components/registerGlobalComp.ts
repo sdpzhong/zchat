@@ -13,8 +13,11 @@ import 'vant/es/notify/style';
 import 'vant/es/image-preview/style';
 
 // self grobal components
-import BackTop from '@/components/BackTop/index.vue';
-import Icon from '@/components/Icon/index.vue';
+import BackTop from '@/components/BackTop/VBackTop.vue';
+import Icon from '@/components/Icon/VIcon.vue';
+
+// Lazyload
+import { Lazyload } from 'vant';
 
 const components = [];
 
@@ -23,4 +26,6 @@ export function registerGlobComp(app: App) {
 
   app.component('VBackTop', BackTop);
   app.component('VIcon', Icon);
+
+  app.use(Lazyload);
 }

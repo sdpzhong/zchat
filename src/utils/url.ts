@@ -8,7 +8,7 @@
 /**
  * 获取字符串链接数组
  * @param urlStr 需要格式化的字符串
- * @returns {String}
+ * @returns {String[]}
  */
 export function getUrls(urlStr: string): string[] {
   const reg = /((http|https|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|])/g;
@@ -26,7 +26,7 @@ export function getUrls(urlStr: string): string[] {
  * @param style 自定义样式
  * @returns {String}
  */
-export function toFormateUrls(originStr: string = '', className = '', style = '') {
+export function toFormatUrls(originStr: string = '', className = '', style = ''): string {
   const regexp = /((http|https|ftp|file):\/\/)((\w|=|\?|\.|\/|\&|-)+)/g;
   return originStr.replace(
     regexp,
@@ -39,9 +39,9 @@ export function toFormateUrls(originStr: string = '', className = '', style = ''
  * @param originStr
  * @param className
  * @param style
- * @returns
+ * @returns {String}
  */
-export function translateUrlHtml(originStr: string = '', className = '', style = '') {
+export function translateUrlHtml(originStr: string = '', className = '', style = ''): string {
   const reg = /((http|https|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|])/g;
   return originStr.replace(
     reg,

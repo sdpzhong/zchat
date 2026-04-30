@@ -2,22 +2,22 @@
  * @Author: zq
  * @Date: 2022-12-01 17:23:24
  * @Last Modified by: zq
- * @Last Modified time: 2022-12-01 18:09:29
+ * @Last Modified time: 2023-02-13 18:21:09
  * 长按事件指令
  */
 
 import type { App, Directive, DirectiveBinding } from 'vue';
 import { isFunction } from '@/utils/is';
 
-export interface CustomDirectiveBinding extends DirectiveBinding {
+export interface LongPressDirectiveBinding extends DirectiveBinding {
   value: {
-    longPressCb?: Function;
+    longPressCb: Function;
     timeout?: number;
   };
 }
 
 const LongPressDirective: Directive = {
-  mounted(el: Element, binding: CustomDirectiveBinding) {
+  mounted(el: Element, binding: LongPressDirectiveBinding) {
     // console.log(el, binding.value);
     const value = binding.value;
     if (!isFunction(value.longPressCb)) {
@@ -54,7 +54,7 @@ const LongPressDirective: Directive = {
       e.preventDefault();
     }
 
-    el.addEventListener('touchstart', () => onTouchstart(value.longPressCb!));
+    el.addEventListener('touchstart', () => onTouchstart(value.longPressCb));
     el.addEventListener('touchend', onTouchend);
     el.addEventListener('touchmove', onTouchmove);
   },

@@ -1,6 +1,3 @@
-/* eslint-env node */
-require('@rushstack/eslint-patch/modern-module-resolution');
-
 module.exports = {
   root: true,
   env: {
@@ -55,7 +52,6 @@ module.exports = {
       },
     ],
     'space-before-function-paren': 'off',
-
     'vue/attributes-order': 'off',
     'vue/one-component-per-file': 'off',
     'vue/html-closing-bracket-newline': 'off',
@@ -80,4 +76,10 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'no-useless-escape': 'off',
   },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx', '*.vue'],
+      rules: { 'no-undef': 'off' },
+    },
+  ],
 };

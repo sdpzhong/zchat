@@ -7,19 +7,19 @@
         height="0.8rem"
         fit="cover"
         position="center"
-        src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
+        :src="userStatusInfo.avatar"
         style="display: block"
         @click="$emit('showSetting')"
       />
     </div>
     <div class="user-status-info" @click="$emit('setOnlineStatus')">
-      <div class="user-nickname">{{ autoFix(userStatus.nickname) }}</div>
+      <div class="user-nickname">{{ autoFix(userStatusInfo.nickname || '_') }}</div>
       <div class="user-online-status"
         ><div
           class="status-dot"
-          :style="{ backgroundColor: UserStatusText[userStatus.status]['color'] }"
+          :style="{ backgroundColor: UserStatusText[userStatusInfo.status]['color'] }"
         ></div>
-        {{ UserStatusText[userStatus.status]['text'] }}</div
+        {{ UserStatusText[userStatusInfo.status]['text'] }}</div
       >
     </div>
   </div>
@@ -29,14 +29,25 @@
   import useTextOverFlow from '@/hooks/component/useTextOverFlow';
   import { UserStatusEnum } from '@/constants/enums/userEnum';
   import { UserStatusText } from '@/constants/modules/user';
-  import type { PropType } from 'vue';
+  import { type PropType, computed } from 'vue';
+  import { useUserStore } from '@/stores';
 
-  type UserStatusInfo = {
-    nickname: string;
-    status: UserStatusEnum;
-  };
+  const userStore = useUserStore();
 
-  defineProps({
+  const userStatusInfo = computed(() => {
+    if (props.isShowSelf) {
+      const { userStatus } = userStore.$state;
+      return {
+        nickname: userStore.getUserInfo?.nickName,
+        avatar: userStore.getUserInfo?.avatar,
+        status: userStatus,
+      };
+    } else {
+      return props.userStatus;
+    }
+  });
+
+  const props = defineProps({
     hasDot: {
       type: Boolean,
       default: false,
@@ -48,9 +59,13 @@
     userStatus: {
       type: Object as PropType<UserStatusInfo>,
       default: () => ({
-        nickname: '一隅北',
+        nickname: '_',
         status: UserStatusEnum.ONLINE,
       }),
+    },
+    isShowSelf: {
+      type: Boolean,
+      default: true,
     },
   });
 

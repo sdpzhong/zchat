@@ -2,7 +2,7 @@
  * @Author: zq
  * @Date: 2022-10-24 17:40:31
  * @Last Modified by: zq
- * @Last Modified time: 2022-10-26 09:36:31
+ * @Last Modified time: 2023-02-04 11:06:06
  * @Desc： 路由守卫配置文件
  */
 
@@ -12,12 +12,14 @@ import type { Router } from 'vue-router';
 import { useUserStore } from '@/stores/modules/user';
 import { getAppEnvConfig } from '@/utils/env';
 import { WHITE_LIST } from '../constant';
+import { useWebSocketStore, useNoticeStore } from '@/stores';
 
 const { VITE_GLOB_APP_TITLE } = getAppEnvConfig();
 
 // 挂载路由守卫函数
 export function setupRouterGuard(router: Router) {
   createHttpGuard(router);
+  createChatRoomVerifyGuard(router);
   createPermissionGuard(router);
   createTitleFixGuard(router);
 }
@@ -43,16 +45,18 @@ function createHttpGuard(router: Router) {
  */
 function createPermissionGuard(router: Router) {
   const userStore = useUserStore();
+  const websocketStore = useWebSocketStore();
   // 权限拦截
-  router.beforeEach(async (to, _from, next) => {
+  router.beforeEach(async (to, from, next) => {
     if (hasCacheToken()) {
       // 2. 判断是否为登录页
       if (to.path === '/login') {
         next('/');
       } else {
-        // 解决页面刷新后用户信息丢失问题
-        if (!userStore.userInfo) {
-          await userStore.refreshUserInfo();
+        // 解决页面刷新后用户信息丢失问题 & websocket 刷新重连
+        if (!['/login', '/register'].includes(from.path) && !userStore.userInfo) {
+          userStore.refreshUserInfo();
+          websocketStore.connectWebSocketService();
         }
         next();
       }
@@ -67,6 +71,7 @@ function createPermissionGuard(router: Router) {
     }
   });
 }
+
 /**
  * 修改页面标题
  * @param router
@@ -74,5 +79,24 @@ function createPermissionGuard(router: Router) {
 function createTitleFixGuard(router: Router) {
   router.afterEach((to) => {
     document.title = VITE_GLOB_APP_TITLE + (to.meta.title ? `-${to.meta.title}` : '');
+  });
+}
+
+/**
+ * 修改页面标题
+ * @param router
+ */
+function createChatRoomVerifyGuard(router: Router) {
+  router.beforeEach((to, from, next) => {
+    if (['/home/private', '/home/group'].includes(to.path)) {
+      const noticeStore = useNoticeStore();
+      if (noticeStore.currentChatRoom.chatId) {
+        next();
+      } else {
+        next(from.path || '/');
+      }
+    } else {
+      next();
+    }
   });
 }

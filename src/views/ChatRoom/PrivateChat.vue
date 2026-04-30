@@ -10,6 +10,9 @@
       <template v-for="chatRecord of chatRecordList" :key="chatRecord.created_date">
         <div class="chat-record-item">
           <template v-if="chatRecord.isSelf">
+            <template v-if="chatRecord.isEndTime">
+              <div class="chat-date-divider">{{ getChatCalendarDate(chatRecord.createdAt) }}</div>
+            </template>
             <div class="self-record">
               <div class="chat-record-content"><span v-html="chatRecord.content"></span></div>
               <van-image
@@ -17,35 +20,30 @@
                 fit="cover"
                 width="1rem"
                 height="1rem"
-                src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
+                :src="userStore.getUserInfo?.avatar"
                 class="user-avatar"
               />
             </div>
-            <template v-if="chatRecord.isEndTime">
-              <div class="chat-date-divider">{{ chatRecord.created_date }}</div>
-            </template>
           </template>
           <template v-else>
+            <template v-if="chatRecord.isEndTime">
+              <div class="chat-date-divider">{{ getChatCalendarDate(chatRecord.createdAt) }}</div>
+            </template>
             <div class="other-record">
               <van-image
                 round
                 fit="cover"
                 width="1rem"
                 height="1rem"
-                :src="chatRecord.avatar"
+                :src="chatRecord.user.avatar"
                 class="user-avatar"
               />
               <div class="chat-record-content"><span v-html="chatRecord.content"></span></div>
             </div>
-
-            <template v-if="chatRecord.isEndTime">
-              <div class="chat-date-divider">{{ chatRecord.created_date }}</div>
-            </template>
           </template>
         </div>
       </template>
     </div>
-    <!-- <van-empty description="PrivateChat 模块未开发" /> -->
     <div class="send-area">
       <van-cell-group>
         <van-field ref="sendInputRef" v-model.trim="sendMsg" type="textarea" rows="1" autosize>
@@ -58,7 +56,7 @@
               @click="handleSend"
             >
               <template #icon>
-                <icon icon="iconoir:send-diagonal" width="0.45rem" />
+                <v-icon icon="iconoir:send-diagonal" width="0.45rem" />
               </template>
             </van-button>
           </template>
@@ -69,12 +67,59 @@
 </template>
 
 <script lang="ts" setup name="PrivateChat">
-  import { nextTick, onMounted, onUnmounted, ref } from 'vue';
-  import Icon from '@/components/Icon/index.vue';
-  import { getChatMockData, type ChatRecordItem } from './mockData';
-  import { toFormateUrls } from '@/utils/url';
+  import { nextTick, onBeforeUnmount, onMounted, onDeactivated, ref } from 'vue';
+  import { toFormatUrls } from '@/utils/url';
   import type { FieldInstance } from 'vant';
   import ChatRomPageHeader from './components/ChatRomPageHeader.vue';
+  import { useWebSocketStore } from '@/stores/modules/websocket';
+  import { SERVER_EVENTS, type WSMsgType } from '@/events/ws';
+  import dayjs from 'dayjs';
+  import { getChatRecord } from '@/api/modules/chat';
+  import { useNoticeStore, useUserStore } from '@/stores';
+  import { getChatCalendarDate } from '@/utils/calendarDate';
+
+  const websocketStore = useWebSocketStore();
+  const userStore = useUserStore();
+  const noticeStore = useNoticeStore();
+
+  noticeStore.setMsgListener((res: WSMsgType<chatRecordResItem>) => {
+    console.log(res.data);
+    const {
+      msgId,
+      senderId,
+      receiverId,
+      chatId,
+      msgType,
+      content,
+      status,
+      createdAt,
+      updatedAt,
+      user,
+    } = res.data;
+    chatRecordList.value.push({
+      msgId,
+      senderId,
+      receiverId,
+      chatId,
+      msgType,
+      content: toFormatUrls(content, undefined, 'word-break: break-all;'),
+      status,
+      createdAt: dayjs(createdAt).format('YYYY-MM-DD HH:mm:ss'),
+      updatedAt: dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+      isSelf: senderId === userStore.getUserInfo?.uid,
+      user,
+      isEndTime: false,
+    });
+
+    setChatRecordDateDivider();
+    nextTick(() => {
+      chatRef.value!.scrollTop = chatRef.value!.scrollHeight;
+    });
+  });
+
+  onDeactivated(() => {
+    noticeStore.clearMsgListener();
+  });
 
   const sendInputRef = ref<FieldInstance | null>(null);
   const sendMsg = ref<string>('');
@@ -84,23 +129,62 @@
   const isEnd = ref(false);
   const valveRef = ref(true);
 
-  const requestCount = ref(0);
+  const requestListParams = ref<ChatRecordForm>({
+    chatId: noticeStore.currentChatRoom.chatId!,
+    current: 1,
+    pageSize: 20,
+  });
 
-  chatRecordList.value = getChatMockData();
+  // chatRecordList.value = getChatMockData();
+
+  async function requestChatRecord() {
+    isLoading.value = true;
+    try {
+      const { data, pages, current } = await getChatRecord(requestListParams.value);
+
+      if (pages === current) {
+        isEnd.value = true;
+      }
+      data.forEach(
+        (v) => (v.content = toFormatUrls(v.content, undefined, 'word-break: break-all;')),
+      );
+      chatRecordList.value = [...data, ...chatRecordList.value];
+
+      setChatRecordDateDivider();
+      requestListParams.value.current!++;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        // 状态处理
+        isLoading.value = false;
+      }, 1000);
+    }
+  }
+
+  async function initChatRecord() {
+    await requestChatRecord();
+    await nextTick();
+    chatRef.value!.scrollTop = chatRef.value!.scrollHeight;
+    // 追加丝滑滚动样式
+    chatRef.value!.style.scrollBehavior = 'smooth';
+  }
+  initChatRecord();
 
   const handleSend = () => {
     if (!sendMsg.value) {
       return;
     }
-    console.log(sendMsg.value);
-    chatRecordList.value.push({
-      nickname: 'xx',
-      avatar: '',
-      content: toFormateUrls(sendMsg.value, undefined, 'word-break: break-all;'),
-      created_date: new Date().toLocaleTimeString(),
-      isSelf: true,
-      isEndTime: false,
+
+    console.log(noticeStore.currentChatRoom.contactId);
+    websocketStore.channel?.sendMsg({
+      event: SERVER_EVENTS.SEND_CHAT_MSG,
+      data: {
+        contactId: noticeStore.currentChatRoom.contactId,
+        msg: sendMsg.value,
+      },
     });
+
     sendMsg.value = '';
     nextTick(() => {
       chatRef.value!.scrollTop = chatRef.value!.scrollHeight;
@@ -114,21 +198,25 @@
       valveRef.value = false;
       isLoading.value = true;
       // 尝试获取历史数据...
-      setTimeout(() => {
-        chatRecordList.value = [...getChatMockData().slice(0, 5), ...chatRecordList.value];
-        // 状态处理
-        isLoading.value = false;
+      setTimeout(async () => {
+        await requestChatRecord();
 
-        requestCount.value++;
-        requestCount.value === 4 && (isEnd.value = true);
         // 重新打开阀门
         valveRef.value = true;
 
-        nextTick(() => {
+        await nextTick(() => {
           chatRef.value!.scrollTop = 0;
         });
-      }, 2000);
+      }, 1000);
     }
+  }
+
+  function setChatRecordDateDivider() {
+    chatRecordList.value.forEach((item, index) => {
+      item.isEndTime =
+        dayjs(chatRecordList.value[index + 1]?.createdAt).diff(dayjs(item?.createdAt), 'seconds') >
+        5 * 60;
+    });
   }
 
   onMounted(() => {
@@ -137,7 +225,8 @@
     chatRef.value?.addEventListener('scroll', chatRefSrcollEvent);
   });
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
+    noticeStore.clearMsgListener();
     chatRef.value?.removeEventListener('scroll', chatRefSrcollEvent);
   });
 </script>
@@ -153,7 +242,6 @@
     display: flex;
     flex-direction: column;
     padding-bottom: 1.3333rem;
-
     background-color: @default-bgc;
     // background-image: url(http://192.168.1.3/openfs/2022/picture/t9cP2em1AM7hpFjXU2sNs.jpg);
     // background-repeat: no-repeat;
@@ -164,7 +252,7 @@
     .chat-record {
       flex: 1;
       overflow-y: auto;
-
+      // scroll-behavior: smooth;
       .history-loading {
         margin: 8px 0;
         text-align: center;
@@ -176,7 +264,7 @@
       .self-record {
         display: flex;
         justify-content: flex-end;
-        padding: 8px;
+        padding: 6px;
 
         .user-avatar {
           flex-shrink: 0;
@@ -188,7 +276,7 @@
         .chat-record-content {
           display: flex;
           align-items: center;
-          padding: 6px;
+          padding: 6px 10px;
           margin-left: 1.4133rem;
           border-radius: 4px;
           background-color: #7978ff;
@@ -201,7 +289,7 @@
 
       .other-record {
         display: flex;
-        padding: 8px;
+        padding: 6px;
         .user-avatar {
           flex-shrink: 0;
           display: block;
@@ -212,7 +300,7 @@
         .chat-record-content {
           display: flex;
           align-items: center;
-          padding: 6px;
+          padding: 6px 10px;
           margin-right: 1.4133rem;
           border-radius: 4px;
           background-color: #fff;
@@ -224,7 +312,7 @@
       }
 
       .chat-date-divider {
-        padding: 4px 0;
+        padding: 12px 0 6px;
         text-align: center;
         color: #999;
         font-size: var(--van-font-size-sm);

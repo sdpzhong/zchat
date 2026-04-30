@@ -11,7 +11,7 @@
   />
 </template>
 
-<script lang="ts" setup name="Icon">
+<script lang="ts" setup name="VIcon">
   import { Icon } from '@iconify/vue';
   import type { StyleValue, PropType } from 'vue';
 
@@ -26,7 +26,7 @@
     },
     height: [String, Number],
     width: [String, Number],
-    rotate: [String, Number],
+    rotate: Number,
     color: String,
   });
 

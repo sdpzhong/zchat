@@ -14,7 +14,19 @@ export const router = createRouter({
   // 是否应该禁止尾部斜杠。默认为假
   strict: true,
   // 切换页面后重置页面滚动条
-  scrollBehavior: () => ({ left: 0, top: 0 }),
+  // scrollBehavior: () => ({ left: 0, top: 0 }),
+  scrollBehavior(to, _from, savedPosition) {
+    // isKeepAlive 返回缓存页面后记录浏览位置
+    if (savedPosition && to.meta?.isKeepAlive) {
+      return savedPosition;
+    }
+    // 异步滚动操作
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ left: 0, top: 0 });
+      }, 0);
+    });
+  },
 });
 
 export function setupRouter(app: App) {

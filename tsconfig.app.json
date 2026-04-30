@@ -3,15 +3,19 @@
   "include": [
     "env.d.ts",
     "src/**/*",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "vite.config.ts",
     "types/**/*",
-    "package.json",
-    "build/**/*"
+    "build/**/*",
+    "vite.config.ts",
+    "package.json"
   ],
   "exclude": [
     "src/**/__tests__/*",
+    "node_modules",
+    "dist",
   ],
   "compilerOptions": {
     "composite": true,

@@ -54,11 +54,11 @@
 
 <style lang="less" scoped>
   .app-layout {
+    height: 100%;
+    // width: 100%;
     .nav-bar-icon {
       color: #fff;
       font-size: 0.5rem;
     }
-    height: 100%;
-    width: 100%;
   }
 </style>

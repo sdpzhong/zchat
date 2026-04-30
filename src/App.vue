@@ -1,5 +1,5 @@
 <template>
-  <van-config-provider :theme-vars="THEME_VARS" class="config-provider">
+  <van-config-provider :theme="'light'" :theme-vars="THEME_VARS" class="config-provider">
     <router-view />
   </van-config-provider>
 </template>

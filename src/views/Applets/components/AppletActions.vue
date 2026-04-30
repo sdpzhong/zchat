@@ -10,12 +10,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { Toast } from 'vant';
+  import { showToast } from 'vant';
   import { ref } from 'vue';
 
   const show = ref(false);
   const actions = [{ name: '选项一' }, { name: '' }, { name: '选项三' }];
-  const onCancel = () => Toast('取消');
+  const onCancel = () => showToast('取消');
 </script>
 
 <style lang="" scoped></style>

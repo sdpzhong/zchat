@@ -6,11 +6,11 @@
     }"
     :style="{ backgroundColor: color }"
   >
-    <van-icon name="down" size="0.6rem" class="inner-icon" @click="handleBackTop" />
+    <van-icon name="back-top" size="0.6757rem" class="inner-icon" @click="handleBackTop" />
   </div>
 </template>
 
-<script lang="ts" setup name="BackTop">
+<script lang="ts" setup name="VBackTop">
   import { nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 
   const props = defineProps({
@@ -72,10 +72,10 @@
     background-color: var(--theme-primary-color);
     box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.25);
     border-radius: 50%;
-    transform: rotate(180deg);
     opacity: 1;
-    transition: opacity 0.5s;
+    transition: 0.5s;
     z-index: 100;
+    cursor: pointer;
     .inner-icon {
       position: relative;
       top: 50%;
@@ -86,5 +86,6 @@
 
   .btn-hidden {
     opacity: 0;
+    transform: scale(0);
   }
 </style>

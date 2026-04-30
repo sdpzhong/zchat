@@ -25,7 +25,7 @@ const home: AppRouteModule = {
       component: () => import('@/views/ChatRoom/PrivateChat.vue'),
       meta: {
         title: 'PrivateChat',
-        isKeepAlive: true,
+        isKeepAlive: false,
       },
     },
     {
@@ -34,7 +34,7 @@ const home: AppRouteModule = {
       component: () => import('@/views/ChatRoom/GroupChat.vue'),
       meta: {
         title: 'GroupChat',
-        isKeepAlive: true,
+        isKeepAlive: false,
       },
     },
   ],

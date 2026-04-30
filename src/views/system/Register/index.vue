@@ -1,7 +1,7 @@
 <template>
   <div class="register-page">
     <div class="top-bar">
-      <div class="register-btn" @click="$router.push('/login')">登录</div>
+      <div class="login-btn" @click="$router.push('/login')">登录</div>
     </div>
     <div class="register-container">
       <div class="container-header">
@@ -15,7 +15,7 @@
       </div>
       <register-form />
     </div>
-    <copyright />
+    <copyright :isFixed="false" />
   </div>
 </template>
 
@@ -26,17 +26,23 @@
 
 <style lang="less" scoped>
   .register-page {
-    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+
     background-color: var(--theme-bg-color);
 
     .top-bar {
-      height: 1rem;
+      height: 1.2rem;
       display: flex;
       justify-content: flex-end;
       align-items: center;
       padding: 0 16px;
       color: #fff;
-      font-size: 14px;
+      font-size: 16px;
+      .login-btn {
+        cursor: pointer;
+      }
     }
     .register-container {
       display: flex;

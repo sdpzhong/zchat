@@ -4,7 +4,7 @@
     closeable
     round
     position="left"
-    :style="{ width: '85%', height: '100%' }"
+    :style="{ maxWidth: '600px', width: '85%', height: '100%' }"
   >
     <div class="user-setting">
       <div class="user-base-info">
@@ -13,42 +13,43 @@
           fit="cover"
           width="1.5rem"
           height="1.5rem"
-          src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
+          :src="userInfo?.avatar || defaultImgUrl"
           class="user-avatar"
         />
         <div class="user-bio-info">
-          <div class="user-nickname">一隅北 <van-icon name="medal-o" /></div>
-          <div class="user-bio">
-            <Icon icon="carbon:edit" />
-            长路漫漫，唯剑作伴。</div
-          >
+          <div class="user-nickname"
+            >{{ userInfo?.nickName || userInfo?.accountName || '_' }} <van-icon name="medal-o"
+          /></div>
+          <div class="user-bio" :title="userInfo?.sign">
+            {{ userInfo?.sign || '个性签名' }}&nbsp;<v-icon icon="carbon:edit"
+          /></div>
         </div>
       </div>
       <div class="action-list">
         <van-cell-group>
           <van-cell size="large" is-link to="/">
             <template #title>
-              <Icon icon="iconoir:user" height="0.5rem" />&nbsp; 个人信息
+              <v-icon icon="iconoir:user" height="0.5rem" />&nbsp; 个人信息
             </template>
           </van-cell>
           <van-cell size="large" is-link to="/">
             <template #title>
-              <Icon icon="iconoir:heart" height="0.5rem" />&nbsp; 我的收藏
+              <v-icon icon="iconoir:heart" height="0.5rem" />&nbsp; 我的收藏
             </template>
           </van-cell>
           <van-cell size="large" is-link to="/">
             <template #title>
-              <Icon icon="iconoir:folder" height="0.5rem" />&nbsp; 我的文件
+              <v-icon icon="iconoir:folder" height="0.5rem" />&nbsp; 我的文件
             </template>
           </van-cell>
           <van-cell size="large" title="主题设置" is-link to="/">
             <template #title>
-              <Icon icon="iconoir:discord" height="0.5rem" />&nbsp; 主题设置
+              <v-icon icon="iconoir:discord" height="0.5rem" />&nbsp; 主题设置
             </template>
           </van-cell>
           <van-cell size="large" title="退出登录" @click="handleLogout">
             <template #title>
-              <Icon icon="iconoir:log-out" height="0.5rem" />&nbsp; 退出登录
+              <v-icon icon="iconoir:log-out" height="0.5rem" />&nbsp; 退出登录
             </template>
           </van-cell>
         </van-cell-group>
@@ -68,25 +69,30 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
-  import Icon from '@/components/Icon/index.vue';
+  import { computed, ref } from 'vue';
+  import { showConfirmDialog } from 'vant';
   import { useUserStore } from '@/stores/modules/user';
-  import { Dialog } from 'vant';
+  import { useWebSocketStore } from '@/stores';
 
   const useStore = useUserStore();
+  const userInfo = computed(() => useStore.getUserInfo);
+  const webSocketStore = useWebSocketStore();
 
   const isShow = ref(false);
+  const defaultImgUrl = 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg';
 
   const showSettingPopup = () => (isShow.value = true);
 
   const handleLogout = () => {
-    Dialog.confirm({
+    showConfirmDialog({
       title: '是否退出登录?',
       beforeClose: (action) =>
         new Promise((resolve) => {
           if (action === 'confirm') {
+            isShow.value = false;
             setTimeout(() => {
               useStore.logout();
+              webSocketStore.closeWebSocketService();
               resolve(true);
             }, 1000);
           } else {
@@ -139,7 +145,7 @@
         .user-nickname {
           font-size: 0.45rem;
           color: #222;
-          font-weight: 500;
+          font-weight: 700;
           flex: 1;
           flex-shrink: 0;
 
@@ -147,7 +153,7 @@
         }
 
         .user-bio {
-          font-size: 0.4rem;
+          font-size: 0.3784rem;
 
           .text-overflow();
         }

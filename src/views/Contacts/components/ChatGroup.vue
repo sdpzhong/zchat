@@ -1,70 +1,59 @@
 <template>
   <div class="chat-group">
-    <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <van-collapse v-model="activeNames">
-        <van-collapse-item name="1" icon="chat-o">
-          <template #title>我管理的群聊</template>
-          <van-cell border clickable v-for="item in 2" :key="item">
-            <template #title>
-              <div class="left-container">
-                <van-image
-                  round
-                  width="1.2rem"
-                  height="1.2rem"
-                  fit="cover"
-                  :src="AvatarImage"
-                  class="chat-group-avatar"
-                />
-                <div class="chat-group-simple-info">
-                  <div class="chat-group-nickname">{{ `薅羊毛(${item})群` }}</div>
-                  <div class="new-msg">{{ '阿迪鞋打骨折贱卖!!' }}</div>
-                </div>
+    <van-collapse v-model="activeNames">
+      <van-collapse-item name="1" icon="chat-o">
+        <template #title>我管理的群聊</template>
+        <van-cell border clickable v-for="item in 2" :key="item">
+          <template #title>
+            <div class="left-container">
+              <van-image
+                round
+                width="1.2rem"
+                height="1.2rem"
+                fit="cover"
+                :src="AvatarImage"
+                class="chat-group-avatar"
+              />
+              <div class="chat-group-simple-info">
+                <div class="chat-group-nickname">{{ `薅羊毛(${item})群` }}</div>
+                <div class="new-msg">{{ '阿迪鞋打骨折贱卖!!' }}</div>
               </div>
-            </template>
-          </van-cell>
-        </van-collapse-item>
-        <van-collapse-item name="2" icon="chat-o">
-          <template #title>我加入的群聊</template>
-          <van-cell border clickable v-for="item in 4" :key="item">
-            <template #title>
-              <div class="left-container">
-                <van-image
-                  round
-                  width="1.2rem"
-                  height="1.2rem"
-                  fit="cover"
-                  src="https://unpkg.com/@vant/assets/ipad.jpeg"
-                  class="chat-group-avatar"
-                />
-                <div class="chat-group-simple-info">
-                  <div class="chat-group-nickname">{{ `lol开黑(${item})群` }}</div>
-                  <div class="new-msg">{{ '五排缺人,快来!' }}</div>
-                </div>
+            </div>
+          </template>
+        </van-cell>
+      </van-collapse-item>
+      <van-collapse-item name="2" icon="chat-o">
+        <template #title>我加入的群聊</template>
+        <van-cell border clickable v-for="item in 4" :key="item">
+          <template #title>
+            <div class="left-container">
+              <van-image
+                round
+                width="1.2rem"
+                height="1.2rem"
+                fit="cover"
+                src="https://unpkg.com/@vant/assets/ipad.jpeg"
+                class="chat-group-avatar"
+              />
+              <div class="chat-group-simple-info">
+                <div class="chat-group-nickname">{{ `lol开黑(${item})群` }}</div>
+                <div class="new-msg">{{ '五排缺人,快来!' }}</div>
               </div>
-            </template>
-            <!-- <template #value> 离线 </template> -->
-          </van-cell>
-        </van-collapse-item>
-      </van-collapse>
-      <van-empty v-if="false" image-size="70" description="您还没有加入任何群聊" />
-    </van-pull-refresh>
+            </div>
+          </template>
+          <!-- <template #value> 离线 </template> -->
+        </van-cell>
+      </van-collapse-item>
+    </van-collapse>
+    <van-empty v-if="false" image-size="70" description="您还没有加入任何群聊" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { Toast } from 'vant';
   import { ref } from 'vue';
   import AvatarImage from '@/assets/images/avatar.jpg';
 
   const activeNames = ref(['1']);
-  const loading = ref(false);
-
-  const onRefresh = () => {
-    setTimeout(() => {
-      Toast('刷新成功');
-      loading.value = false;
-    }, 1000);
-  };
 </script>
 
 <style lang="less" scoped>

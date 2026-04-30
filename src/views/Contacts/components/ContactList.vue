@@ -1,55 +1,94 @@
 <template>
   <div class="contact-list">
-    <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <van-index-bar :sticky="false">
-        <template v-for="item of renderItems" :key="item">
-          <van-index-anchor :index="item" />
-          <!-- <van-cell v-for="itemText of 6" :title="`${item}-${itemText}`" :key="itemText" /> -->
-          <van-cell border clickable v-for="userItem in 4" :key="userItem">
-            <template #title>
-              <div class="left-container">
-                <van-image
-                  round
-                  width="1.2rem"
-                  height="1.2rem"
-                  fit="cover"
-                  :src="AvatarImage"
-                  class="user-avatar"
-                  :class="{ 'deactive-status': userItem % 3 === 0 }"
-                />
-                <div class="user-simple-info">
-                  <div class="user-nickname">{{ '陌上花开' }}</div>
-                  <div class="new-msg">{{
-                    `[${userItem % 3 === 0 ? '离线' : '在线'}]` + ' 长路漫漫, 唯剑作伴'
-                  }}</div>
-                </div>
+    <!-- <van-pull-refresh v-model="loading" @refresh="onRefresh"> -->
+    <van-index-bar :sticky="false" :index-list="indexList">
+      <template v-for="item of contectIndexGroupRecord" :key="item">
+        <van-index-anchor v-if="item.data.length" :index="item.letter" />
+        <!-- <van-cell v-for="itemText of 6" :title="`${item}-${itemText}`" :key="itemText" /> -->
+        <van-cell
+          border
+          clickable
+          :key="contactItem.contactId"
+          v-for="contactItem in item.data"
+          @click="handleChat(contactItem)"
+        >
+          <template #title>
+            <div class="left-container">
+              <van-image
+                round
+                width="1.2rem"
+                height="1.2rem"
+                fit="cover"
+                :src="contactItem.user.avatar || AvatarImage"
+                class="user-avatar"
+                :class="{ 'deactive-status': !contactItem.isOnline }"
+              />
+              <div class="user-simple-info">
+                <div class="user-nickname"
+                  >{{ contactItem.contactName
+                  }}{{ contactItem.remark ? `(${contactItem.remark})` : '' }}</div
+                >
+                <div class="new-msg">{{
+                  `[${contactItem.isOnline ? '在线' : '离线'}]` + ` ${contactItem.user.sign}`
+                }}</div>
               </div>
-            </template>
-          </van-cell>
-        </template>
-      </van-index-bar>
-    </van-pull-refresh>
-    <van-empty v-if="false" image-size="70" description="真可怜, 您还没有一个好友" />
+            </div>
+          </template>
+        </van-cell>
+      </template>
+    </van-index-bar>
+    <!-- </van-pull-refresh> -->
+    <van-empty v-if="isNoContact" image-size="70" description="真可怜, 您还没有一个好友" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { Toast } from 'vant';
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import AvatarImage from '@/assets/images/avatar.jpg';
+  import { indexGroup } from '@/utils/indexGroup';
+  import { getContacts } from '@/api/modules/chat';
+  import { useNoticeStore } from '@/stores';
+  import { useRouter } from 'vue-router';
 
-  const renderItems = Array(26)
-    .fill(undefined)
-    .map((_v, i) => String.fromCharCode(i + 65));
+  const noticeStore = useNoticeStore();
+  const router = useRouter();
 
-  const loading = ref(false);
+  const contactList = ref<ContactItem[]>([]);
+  const contectIndexGroupRecord = computed(() =>
+    indexGroup(contactList!.value || [], 'contactName'),
+  );
+  const indexList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  const isNoContact = ref(false);
 
-  const onRefresh = () => {
-    setTimeout(() => {
-      Toast('刷新成功');
-      loading.value = false;
-    }, 1000);
+  async function requestContactList() {
+    try {
+      contactList.value = await getContacts();
+      contactList.value.forEach((v) => {
+        v.contactName = v.user.nickName || v.user.accountName || '';
+      });
+      isNoContact.value = !contactList.value.length;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  requestContactList();
+
+  const handleChat = ({ chatId, type, contactId, contactName, isOnline }: ContactItem) => {
+    noticeStore.setMsgListenerConfig({
+      chatId,
+      type,
+      contactId,
+      chatRoomName: contactName,
+      userStatus: 0,
+      isOnline,
+    });
+    router.push('/home/private');
   };
+
+  defineExpose({
+    refreshRecord: requestContactList,
+  });
 </script>
 
 <style lang="less" scoped>
@@ -60,6 +99,7 @@
   }
   .contact-list {
     // background-color: #eee;
+    padding-bottom: 1.3333rem;
   }
 
   .left-container {

@@ -9,50 +9,67 @@
       input-align="center"
       placeholder="搜索"
       readonly
+      shape="round"
       @click-input="$router.push('/user-search')"
     />
     <!-- down refresh with chatlist-->
     <van-pull-refresh v-model="refreshing" success-text="刷新成功" @refresh="onRefresh">
       <!-- <template #loosing> </template> -->
-      <van-list
-        v-model:loading="isLoading"
-        v-model:error="isError"
-        :finished="isFinished"
-        finished-text="已经到底了 T_T"
-        error-text="加载失败，请点击重试"
-        @load="onLoad"
-        class="chat-list"
+      <van-swipe-cell
+        v-for="item in chatRecordList"
+        v-show="!item.isHidden"
+        :key="item.chatId"
+        :name="item.chatId"
       >
-        <van-swipe-cell v-for="item in chatList" :key="item" :title="item">
-          <template #right>
-            <van-button class="right-actions-btn" square type="warning" text="置顶" />
-            <van-button class="right-actions-btn" square type="danger" text="删除" />
-          </template>
-          <van-cell border clickable size="large" :to="`/home/private?uid=${item}&type=0`">
-            <template #title>
-              <div class="left-container">
-                <van-image
-                  round
-                  width="1.2rem"
-                  height="1.2rem"
-                  fit="cover"
-                  src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
-                  class="user-avatar"
-                />
-                <div class="user-simple-info">
-                  <div class="user-nickname">{{ '吴彦祖' }}</div>
-                  <div class="new-msg">{{ '[离线] 你食饭了没有啊？' }}</div>
-                </div>
+        <template #right>
+          <van-button
+            class="right-actions-btn"
+            square
+            type="warning"
+            :text="item.isSetTop ? '取消置顶' : '置顶'"
+            @click="handleSetTop(item)"
+          />
+          <van-button
+            class="right-actions-btn"
+            square
+            type="danger"
+            text="删除"
+            @click="handleRemoveReocord(item.contactId)"
+          />
+        </template>
+        <van-cell border clickable size="large" @click="handleChat(item)">
+          <template #title>
+            <div class="left-container">
+              <van-image
+                round
+                width="1.2rem"
+                height="1.2rem"
+                fit="cover"
+                :src="item.type === 0 ? item.user.avatar : item.chatRoom.chatAvatar"
+                class="user-avatar"
+                :class="{ 'deactive-status': !item.isOnline }"
+              />
+              <div class="user-simple-info">
+                <div class="user-nickname">{{
+                  (item.type === 0 ? item.user.nickName : item.chatRoom.chatName) || ''
+                }}</div>
+                <div class="new-msg">
+                  <span v-if="item.type === 0">
+                    {{ `[${item.isOnline ? '在线' : '离线'}]` }}
+                  </span>
+                  <span v-if="item.type === 1"> [{{ item.user.nickName }}] </span>
+                  {{ item.lastMsg?.content || '' }}</div
+                >
               </div>
-            </template>
-            <template #value>
-              <span class="date-info">
-                {{ getCalendarDate() }}
-              </span>
-            </template>
-          </van-cell>
-        </van-swipe-cell>
-      </van-list>
+            </div>
+          </template>
+          <template #value>
+            <span class="date-info">
+              {{ item.lastMsg?.createdAt ? getCalendarDate(item.lastMsg?.createdAt) : '' }}
+            </span>
+          </template>
+        </van-cell>
+      </van-swipe-cell>
       <van-empty v-if="isEmpty" description="暂时没有新消息" />
     </van-pull-refresh>
     <v-back-top target="#scroll_home_view" />
@@ -60,42 +77,61 @@
 </template>
 
 <script lang="ts" setup name="HomePage">
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
+  import { useRouter } from 'vue-router';
   import { getCalendarDate } from '@/utils/calendarDate';
   import HomePageHeader from './components/HomePageHeader.vue';
+  import { useNoticeStore, useContactStore } from '@/stores';
 
-  const chatList = ref<any[]>([]);
-  const isLoading = ref(false);
-  const isFinished = ref(false);
-  const isError = ref(false);
-  const isEmpty = ref(false);
+  const noticeStore = useNoticeStore();
+  const contactStore = useContactStore();
+  const router = useRouter();
+
+  const chatRecordList = computed(() => contactStore.contactList);
+  // const isError = ref(false);
+  const isEmpty = computed(() => !chatRecordList.value.filter((v) => !v.isHidden).length);
   const refreshing = ref(false);
 
-  const onLoad = () => {
-    setTimeout(() => {
-      if (refreshing.value) {
-        chatList.value = [];
-        refreshing.value = false;
-      }
+  const onRefresh = async () => {
+    // 重新加载数据
+    try {
+      refreshing.value = true;
 
-      for (let i = 0; i < 15; i++) {
-        chatList.value.push(chatList.value.length + 1);
-      }
-      isLoading.value = false;
-
-      if (chatList.value.length >= 60) {
-        isFinished.value = true;
-      }
-    }, 1000);
+      await contactStore.syncContactListFromServer();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      refreshing.value = false;
+    }
   };
 
-  const onRefresh = () => {
-    // 清空列表数据
-    isFinished.value = false;
-    // 重新加载数据
-    // 将 loading 设置为 true，表示处于加载状态
-    isLoading.value = true;
-    onLoad();
+  const handleChat = ({
+    chatId,
+    type,
+    contactId,
+    user: { nickName },
+    chatRoom: { chatName },
+    isOnline,
+  }: ContactListItem) => {
+    noticeStore.setMsgListenerConfig({
+      chatId,
+      type,
+      chatRoomName: type === 0 ? nickName : chatName,
+      userStatus: 0,
+      isOnline,
+      contactId,
+    });
+    router.push('/home/private');
+  };
+
+  const handleSetTop = (item: ContactListItem) => {
+    contactStore.setContactTop(item.contactId, !item.isSetTop);
+    return false;
+  };
+
+  const handleRemoveReocord = (contactId: number) => {
+    contactStore.updateContactHiddenStatus(contactId, true);
+    return false;
   };
 </script>
 
