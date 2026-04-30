@@ -47,7 +47,7 @@ export function formatRequestDate(params: Recordable) {
   }
 }
 
-export function setObjToUrlParams(baseUrl: string, obj: any): string {
+export function setObjToUrlParams(baseUrl: string, obj: Recordable): string {
   let parameters = '';
   for (const key in obj) {
     parameters += key + '=' + encodeURIComponent(obj[key]) + '&';

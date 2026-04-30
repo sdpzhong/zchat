@@ -33,7 +33,7 @@ export const getConfigFileName = (env: Record<string, any>) => {
  * @param envConf 环境变量对象
  * @returns {ViteEnv} ViteEnv
  */
-export function wrapperEnv(envConf: Recordable): ViteEnv {
+export function wrapperEnv(envConf: Recordable): ImportMetaEnv {
   const ret: any = {};
 
   for (const envName of Object.keys(envConf)) {

@@ -26,7 +26,7 @@
     },
     height: [String, Number],
     width: [String, Number],
-    rotate: [String, Number],
+    rotate: Number,
     color: String,
   });
 

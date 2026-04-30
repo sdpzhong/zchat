@@ -1,8 +1,8 @@
 /*
  * @Author: zq
  * @Date: 2022-10-22 11:25:32
- * @Last Modified by: zq
- * @Last Modified time: 2023-02-09 09:57:04
+ * @Last Modified by: sdpzhong
+ * @Last Modified time: 2026-04-29 17:41:08
  * @desc: 请求实例配置文件
  */
 import type { AxiosTransform, CreateAxiosOptions } from './axiosConfig';
@@ -235,7 +235,7 @@ function createAxios(config: CreateAxiosOptions = {}) {
           apiUrl: import.meta.env.VITE_GLOB_API_URL,
           // 接口拼接地址
           urlPrefix: '',
-          //  是否加入时间戳
+          // 是否加入时间戳
           joinTime: true,
           // 忽略重复请求
           ignoreCancelToken: true,

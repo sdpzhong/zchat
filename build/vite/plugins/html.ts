@@ -1,8 +1,8 @@
 /*
  * @Author: zq
  * @Date: 2022-10-26 10:54:23
- * @Last Modified by: zq
- * @Last Modified time: 2022-10-29 17:18:59
+ * @Last Modified by: sdpzhong
+ * @Last Modified time: 2026-04-29 16:53:28
  * @desc: vite-html-plugin config
  */
 
@@ -11,7 +11,7 @@ import { createHtmlPlugin } from 'vite-plugin-html';
 import pkg from '../../../package.json';
 import { GLOB_CONFIG_FILE_NAME } from '../../contants';
 
-export function configHtmlPlugin(env: ViteEnv, isBuild: boolean) {
+export function configHtmlPlugin(env: ImportMetaEnv, isBuild: boolean) {
   const { VITE_GLOB_APP_TITLE, VITE_PUBLIC_PATH } = env;
 
   const path = VITE_PUBLIC_PATH.endsWith('/') ? VITE_PUBLIC_PATH : `${VITE_PUBLIC_PATH}/`;

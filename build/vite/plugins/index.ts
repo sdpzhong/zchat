@@ -1,8 +1,8 @@
 /*
  * @Author: zq
  * @Date: 2022-10-26 10:53:43
- * @Last Modified by: zq
- * @Last Modified time: 2023-01-11 17:26:10
+ * @Last Modified by: sdpzhong
+ * @Last Modified time: 2026-04-29 16:54:06
  * @ vite 插件主体配置文件
  */
 
@@ -18,7 +18,7 @@ import { visualizerPlugin } from './visualizer';
 
 import { isReportMode } from '../../utils';
 
-export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
+export function createVitePlugins(viteEnv: ImportMetaEnv, isBuild: boolean) {
   const vitePlugins: (PluginOption | PluginOption[])[] = [
     Vue(),
     // 新增 JSX 语法支持

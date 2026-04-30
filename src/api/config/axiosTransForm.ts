@@ -1,8 +1,8 @@
 /*
  * @Author: zq
  * @Date: 2022-10-22 11:21:43
- * @Last Modified by: zq
- * @Last Modified time: 2022-10-22 15:35:56
+ * @Last Modified by: sdpzhong
+ * @Last Modified time: 2026-04-29 17:42:02
  * @desc: Axios 请求参数或响应数据统一处理
  */
 import type { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
@@ -34,7 +34,7 @@ export abstract class AxiosTransform {
    * @description: 请求之前的拦截器
    */
   requestInterceptors?: (
-    config: AxiosRequestConfig,
+    config: InternalAxiosRequestConfig,
     options: CreateAxiosOptions,
   ) => InternalAxiosRequestConfig;
 
