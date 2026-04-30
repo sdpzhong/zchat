@@ -19,6 +19,8 @@ import { initAppConfig } from './events/initAppConfig';
 // dayjs 语言配置（后续会进行国际化统一管理）
 import dayjs_cn from 'dayjs/locale/zh-cn';
 import dayjs from 'dayjs';
+import { isDevMode } from './utils/env';
+
 dayjs.locale(dayjs_cn);
 
 async function bootstrap() {
@@ -45,3 +47,14 @@ async function bootstrap() {
   app.mount('#app');
 }
 bootstrap();
+
+// 开发环境下初始化 vConsole 调试插件
+if (isDevMode()) {
+  Promise.all([import('vconsole'), import('vue-vconsole-devtools')]).then((importModule) => {
+    if (importModule.length === 2) {
+      const VConsole = importModule[0].default;
+      const Devtools = importModule[1].default;
+      Devtools.initPlugin(new VConsole());
+    }
+  });
+}

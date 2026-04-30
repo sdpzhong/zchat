@@ -6,16 +6,6 @@
 
 <script setup lang="ts">
   import { THEME_VARS } from '@/constants/modules/theme';
-  import { onMounted } from 'vue';
-  import VConsole from 'vconsole';
-  import { initPlugin } from 'vue-vconsole-devtools';
-  import { isDevMode } from './utils/env';
-
-  onMounted(async () => {
-    if (isDevMode()) {
-      initPlugin(new VConsole());
-    }
-  });
 </script>
 
 <style lang="less" scoped>
